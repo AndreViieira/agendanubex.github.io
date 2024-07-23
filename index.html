@@ -14,6 +14,32 @@
       text-align: center;
     }
     
+    .tab {
+      overflow: hidden;
+      border: 1px solid #ccc;
+      background-color: #f1f1f1;
+    }
+    
+    .tab button {
+      background-color: inherit;
+      float: left;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      padding: 14px 16px;
+      transition: 0.3s;
+    }
+    
+    .tab button.active {
+      background-color: #ccc;
+    }
+    
+    .tabcontent {
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-top: none;
+    }
+    
     form {
       max-width: 400px;
       margin: 0 auto;
@@ -48,18 +74,30 @@
 <body>
   <h1>Agendamento de Consulta</h1>
   
-  <form id="appointment-form">
-    <label for="name">Nome:</label>
-    <input type="text" id="name" name="name" required>
-    
-    <label for="date">Data:</label>
-    <input type="date" id="date" name="date" required>
-    
-    <label for="time">Horário:</label>
-    <input type="time" id="time" name="time" required>
-    
-    <button type="submit">Agendar</button>
-  </form>
+  <div class="tab">
+    <button class="tablinks" onclick="openTab(event, 'appointment-form')">Agendar</button>
+    <button class="tablinks" onclick="openTab(event, 'appointment-calendar')">Calendário</button>
+  </div>
+  
+  <div id="appointment-form" class="tabcontent">
+    <form id="appointment-form-content">
+      <label for="name">Nome:</label>
+      <input type="text" id="name" name="name" required>
+      
+      <label for="date">Data:</label>
+      <input type="date" id="date" name="date" required>
+      
+      <label for="time">Horário:</label>
+      <input type="time" id="time" name="time" required>
+      
+      <button type="submit">Agendar</button>
+    </form>
+  </div>
+  
+  <div id="appointment-calendar" class="tabcontent" style="display: none;">
+    <h2>Calendário de Agendamentos</h2>
+    <!-- Conteúdo do calendário de agendamentos -->
+  </div>
   
   <script>
     // Função para formatar a data e o horário
@@ -70,8 +108,23 @@
       return `${formattedDate} ${formattedTime}`;
     }
 
+    // Função para abrir a aba selecionada
+    function openTab(evt, tabName) {
+      var i, tabcontent, tablinks;
+      tabcontent = document.getElementsByClassName("tabcontent");
+      for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+      }
+      tablinks = document.getElementsByClassName("tablinks");
+      for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+      }
+      document.getElementById(tabName).style.display = "block";
+      evt.currentTarget.className += " active";
+    }
+
     // Adiciona event listener ao formulário
-    document.getElementById('appointment-form').addEventListener('submit', function(event) {
+    document.getElementById('appointment-form-content').addEventListener('submit', function(event) {
       event.preventDefault(); // Impede o envio padrão do formulário
 
       // Obtém os valores dos campos
