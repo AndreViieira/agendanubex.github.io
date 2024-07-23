@@ -66,6 +66,7 @@
       margin-top: 20px;
       border: 1px solid #ddd;
       padding: 10px;
+      display: none;
     }
   </style>
 </head>
@@ -114,9 +115,8 @@
   </main>
   
   <script>
-    // JavaScript code goes here
     // Sample event data
-    const events = [
+    let events = [
       {
         date: "2024-07-23",
         startTime: "09:00",
@@ -142,7 +142,42 @@
 
     // Function to generate the calendar
     function generateCalendar() {
-      // ... (existing calendar generation code)
+      const calendarBody = document.getElementById('calendar-body');
+      calendarBody.innerHTML = '';
+
+      const currentDate = new Date();
+      let month = currentDate.getMonth() + 1;
+      let year = currentDate.getFullYear();
+
+      // Generate calendar for the current month
+      for (let i = 1; i <= new Date(year, month, 0).getDate(); i++) {
+        const dayOfWeek = new Date(year, month - 1, i).getDay();
+
+        if (dayOfWeek === 0) {
+          const row = document.createElement('tr');
+          calendarBody.appendChild(row);
+        }
+
+        const cell = document.createElement('td');
+        cell.textContent = i;
+        cell.addEventListener('click', () => showEventDetails(i, month, year));
+
+        // Check if there are any events on this day
+        const eventElement = events.find(event => {
+          const [eventYear, eventMonth, eventDay] = event.date.split('-');
+          return parseInt(eventDay) === i && parseInt(eventMonth) === month && parseInt(eventYear) === year;
+        });
+
+        if (eventElement) {
+          const eventDiv = document.createElement('div');
+          eventDiv.classList.add('event');
+          eventDiv.textContent = `${eventElement.responsible} - ${eventElement.startTime} - ${eventElement.endTime}`;
+          eventDiv.setAttribute('data-date', `${year}-${month}-${i}`);
+          cell.appendChild(eventDiv);
+        }
+
+        calendarBody.lastChild.appendChild(cell);
+      }
     }
 
     // Function to show event details
@@ -168,7 +203,50 @@
 
     // Function to request a new event
     function requestNewEvent() {
-      // ... (existing requestNewEvent() function)
+      const requestDate = document.getElementById('request-date').value;
+      const requestStartTime = document.getElementById('request-start-time').value;
+      const requestEndTime = document.getElementById('request-end-time').value;
+      const requestResponsible = document.getElementById('request-responsible').value;
+      const requestDescription = document.getElementById('request-description').value;
+
+      // Validate input
+      if (!requestDate || !requestStartTime || !requestEndTime || !requestResponsible || !requestDescription) {
+        alert('Por favor, preencha todos os campos.');
+        return;
+      }
+
+      // Check if the requested date and time are available
+      const existingEvent = events.find(event => {
+        const [eventYear, eventMonth, eventDay] = event.date.split('-');
+        return event.date === requestDate && (
+          (event.startTime >= requestStartTime && event.startTime <= requestEndTime) ||
+          (event.endTime >= requestStartTime && event.endTime <= requestEndTime)
+        );
+      });
+
+      if (existingEvent) {
+        alert('Horário já reservado. Por favor, selecione outro horário.');
+        return;
+      }
+
+      // Add the new event to the events array
+      events.push({
+        date: requestDate,
+        startTime: requestStartTime,
+        endTime: requestEndTime,
+        responsible: requestResponsible,
+        description: requestDescription
+      });
+
+      // Clear the form
+      document.getElementById('request-date').value = '';
+      document.getElementById('request-start-time').value = '';
+      document.getElementById('request-end-time').value = '';
+      document.getElementById('request-responsible').value = '';
+      document.getElementById('request-description').value = '';
+
+      // Regenerate the calendar
+      generateCalendar();
     }
 
     // Generate the initial calendar
